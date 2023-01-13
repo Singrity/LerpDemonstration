@@ -5,18 +5,18 @@ import random
 
 class Particle:
 
-    def __init__(self, pos, size, color, life, collision_rects=None):
+    def __init__(self, pos, size, color, life_time, collision_rects=None):
         self.pos = pygame.Vector2(pos)
         self.size = pygame.Vector2(size)
-        self.rect = pygame.Rect(self.pos, size)
-        self.rect.center = self.pos
-        self.speed = pygame.Vector2(1, 0)
+        self.speed = pygame.Vector2(100, 100)
         self.direction = pygame.Vector2(1, 1)
         self.color = color
         self.collision_rects = collision_rects
+        self.g = 0
+        self.mass = 0
 
-        self.g = 2
-        self.mass = 0.1
+        self.rect = pygame.Rect(self.pos, size)
+        self.rect.center = self.pos
 
         self.min_width = 1
         self.min_height = 1
@@ -28,14 +28,19 @@ class Particle:
 
         self.direction = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
 
-        self.life = life
-        self.time = 0
+        self.life_time = life_time
+        self.current_time = 0
 
         self.alive = True
 
     def draw(self):
         screen = pygame.display.get_surface()
         pygame.draw.rect(screen, self.color, self.rect)
+
+    def apply_gravity(self, dt):
+        self.direction.y = lerp(self.direction.y, 1, dt)
+        self.g = 1
+        self.mass = 0.5
 
     def check_collision(self):
 
@@ -57,47 +62,28 @@ class Particle:
                     elif abs(rect.right - self.rect.left) < 10 and self.direction.x < 0:
                         self.direction.x *= -1
 
-    def apply_gravity(self, dt):
-        pass
-
-    def update(self, dt):
-        #dt *= 1000.
-        K_size = 0.1
-        K_size = 1.0 - K_size ** dt
-
-        K_pos = 0.999
-        K_pos = 1.0 - K_pos ** dt
-
-        self.time += dt
-        if self.time >= self.life:
-            pass
+    def update(self, dt):  # dt in seconds
+        #print(dt)
+        if self.rect.width <= 1:
             self.alive = False
 
-        current_width = lerp(self.rect.width, self.target_width, 1)
-        current_height = lerp(self.rect.height, self.target_height, 1)
+        self.size.x = lerp(self.size.x, self.target_width, f(dt))
+        self.size.y = lerp(self.size.y, self.target_height, f(dt))
 
-        current_pos_x = lerp(self.pos.x, self.pos.x + 30 * self.direction.x, K_pos)
-        current_pos_y = lerp(self.pos.y, self.pos.y + 30 * self.direction.y, K_pos)
+        #self.speed.x = lerp(self.speed.x, 0, f(dt))
+        #self.speed.y = lerp(self.speed.y, 0, f(dt))
 
-        #print(self.rect)
-        self.rect.size = (current_width, current_height)
-        self.pos = pygame.Vector2(current_pos_x, current_pos_y)
+        self.pos.x = lerp(self.pos.x, self.pos.x + self.speed.x * self.direction.x * self.g * self.mass, f(dt))
+        self.pos.y = lerp(self.pos.y, self.pos.y + self.speed.y * self.direction.y * self.g * self.mass, f(dt))
+
+        self.rect.size = (self.size.x, self.size.y)
+        self.rect.x, self.rect.y = (self.pos.x, self.pos.y)
+        #print(self.rect.size)
+
         self.rect.center = self.pos
 
-        # if abs(current_width - self.target_width) < self.target_width / current_width or\
-        #         abs(current_height - self.target_height) < self.target_height / current_height:
-        #     self.target_width = self.min_width if self.target_width == self.max_width else self.max_width
-        #     self.target_height = self.min_height if self.target_height == self.max_height else self.max_height
-
-
-
         self.check_collision()
-        #self.apply_gravity(dt * 1000.)
-
-
-
-
-
+        self.apply_gravity(dt)
 
 
 
