@@ -1,5 +1,5 @@
 import pygame
-from util import lerp
+from util import lerp, f
 import random
 
 
@@ -14,6 +14,9 @@ class Particle:
         self.direction = pygame.Vector2(1, 1)
         self.color = color
         self.collision_rects = collision_rects
+
+        self.g = 2
+        self.mass = 0.1
 
         self.min_width = 1
         self.min_height = 1
@@ -54,20 +57,24 @@ class Particle:
                     elif abs(rect.right - self.rect.left) < 10 and self.direction.x < 0:
                         self.direction.x *= -1
 
+    def apply_gravity(self, dt):
+        pass
+
     def update(self, dt):
+        #dt *= 1000.
         K_size = 0.1
         K_size = 1.0 - K_size ** dt
 
-        K_pos = 0.02
+        K_pos = 0.999
         K_pos = 1.0 - K_pos ** dt
 
-        self.time += dt * 1000.
+        self.time += dt
         if self.time >= self.life:
             pass
             self.alive = False
 
-        current_width = lerp(self.rect.width, self.target_width, K_size)
-        current_height = lerp(self.rect.height, self.target_height, K_size)
+        current_width = lerp(self.rect.width, self.target_width, 1)
+        current_height = lerp(self.rect.height, self.target_height, 1)
 
         current_pos_x = lerp(self.pos.x, self.pos.x + 30 * self.direction.x, K_pos)
         current_pos_y = lerp(self.pos.y, self.pos.y + 30 * self.direction.y, K_pos)
@@ -85,6 +92,7 @@ class Particle:
 
 
         self.check_collision()
+        #self.apply_gravity(dt * 1000.)
 
 
 
