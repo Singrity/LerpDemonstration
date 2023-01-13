@@ -22,7 +22,7 @@ class Game:
 
     def run(self):
         while self.running:
-            self.clock.tick(60)
+            self.clock.tick()
             time_passed_ms = self.clock.get_time()
             time_passed_s = time_passed_ms / 1000.
             #print(time_passed_ms)
@@ -42,8 +42,9 @@ class Game:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     for _ in range(30):
-                        particle = Particle(pygame.mouse.get_pos(), (20, 20), (255, 255, 255), 1000, [self.box_rect1, self.box_rect2, self.box_rect3])
+                        particle = Particle(pygame.mouse.get_pos(), (20, 20), (255, 255, 255), 1.5, [self.box_rect1, self.box_rect2, self.box_rect3])
                         self.particles.append(particle)
+                        print(len(self.particles))
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.pressed = False
@@ -85,4 +86,5 @@ if __name__ == '__main__':
     game = Game()
     game.run()
     pygame.quit()
+
 
