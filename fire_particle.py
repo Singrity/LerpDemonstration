@@ -1,19 +1,17 @@
 import pygame
-from util import lerp, f
+from util import *
 import random
 
-
-class Particle:
-
-    def __init__(self, pos, size, color, life_time, collision_rects=None):
+class FireParticle:
+    def __init__(self, pos, size, color, collision_rects=None):
         self.pos = pygame.Vector2(pos)
         self.size = pygame.Vector2(size)
         self.speed = pygame.Vector2(100, 100)
-        self.direction = pygame.Vector2(1, 1)
         self.color = color
+        
         self.collision_rects = collision_rects
-        self.g = 0
-        self.mass = 0
+        self.g = 0.6
+        self.mass = 1
 
         self.rect = pygame.Rect(self.pos, size)
         self.rect.center = self.pos
@@ -26,9 +24,8 @@ class Particle:
         self.target_width = 1
         self.target_height = 1
 
-        self.direction = pygame.Vector2(random.uniform(-1, 1), random.uniform(-1, 1))
+        self.direction = pygame.Vector2(random.uniform(-1, 1), -1)
 
-        self.life_time = life_time
         self.current_time = 0
 
         self.alive = True
@@ -38,7 +35,7 @@ class Particle:
 
     def draw(self):
         screen = pygame.display.get_surface()
-        pygame.draw.rect(screen, self.color, self.rect)
+        pygame.draw.circle(screen, self.color, self.rect.center, self.rect.width)
 
     def apply_gravity(self, dt):
         self.direction.y = lerp(self.direction.y, 1, dt)
@@ -66,15 +63,16 @@ class Particle:
                         self.direction.x *= -1
 
     def update(self, dt):  # dt in seconds
-        self.apply_gravity(dt)
     
-        force = self.compute_force()
-        acceleration = pygame.Vector2(force.x / self.mass, force.y / self.mass)
-        self.speed.x += acceleration.x * dt
-        self.speed.y += acceleration.y * dt
+        #self.apply_gravity(dt)
+    
+        #force = self.compute_force()
+        #acceleration = pygame.Vector2(force.x / self.mass, force.y / self.mass)
+        #self.speed.x += acceleration.x * dt
+        #self.speed.y += acceleration.y * dt
     
         #print(dt)
-        if self.rect.width <= 1:
+        if self.rect.width <= self.target_width:
             self.alive = False
 
         self.size.x = lerp(self.size.x, self.target_width, f(dt))
@@ -83,8 +81,8 @@ class Particle:
         #self.speed.x = lerp(self.speed.x, 0, f(dt))
         #self.speed.y = lerp(self.speed.y, 0, f(dt))
 
-        self.pos.x = lerp(self.pos.x, self.pos.x + self.speed.x * self.direction.x * self.g * self.mass, f(dt))
-        self.pos.y = lerp(self.pos.y, self.pos.y + self.speed.y * self.direction.y * self.g * self.mass, f(dt))
+        self.pos.x = lerp(self.pos.x, self.pos.x + random.randint(-100, 100), f(dt))
+        self.pos.y = lerp(self.pos.y, self.pos.y + 20 * self.direction.y, f(dt))
 
         self.rect.size = (self.size.x, self.size.y)
         self.rect.x, self.rect.y = (self.pos.x, self.pos.y)
@@ -92,13 +90,6 @@ class Particle:
 
         self.rect.center = self.pos
 
-        self.check_collision()
+        #self.check_collision()
         #self.apply_gravity(dt)
-
-
-
-
-
-
-
-
+        
